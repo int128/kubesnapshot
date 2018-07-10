@@ -12,4 +12,3 @@ kubesnapshot
 ## WIP
 
 - [ ] Concurrent ops and handle errors.
-- [ ] Provide options by args or env vars.
