@@ -1,27 +1,26 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 
+	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/int128/kubesnapshot/aws_k8s"
 	"github.com/int128/kubesnapshot/backup"
 	"github.com/int128/kubesnapshot/options"
 )
 
-func main() {
+func handler(ctx context.Context) error {
 	opts, err := options.Parse()
 	if err != nil {
-		if !options.IsErrHelp(err) {
-			log.Print(err)
-		}
 		options.WriteHelp(os.Stderr)
-		os.Exit(1)
+		return err
 	}
 	sess, err := session.NewSession()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	svc := aws_k8s.New(sess)
 	b := &backup.Backup{
@@ -30,7 +29,9 @@ func main() {
 		RetainSnapshots: opts.RetainSnapshots,
 	}
 	log.Printf("Backup the cluster %+v", b)
-	if err := b.Do(svc); err != nil {
-		log.Fatalf("Error: %s", err)
-	}
+	return b.Do(svc)
+}
+
+func main() {
+	lambda.Start(handler)
 }
