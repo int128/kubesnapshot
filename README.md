@@ -1,29 +1,48 @@
 # kubesnapshot
 
-`kubesnapshot` creates snapshots for EBS volumes owned by the Kubernetes cluster.
+A command to create snapshots for EBS volumes owned by the Kubernetes cluster on AWS.
+Written in Go.
 
-## Getting Started
 
-Configure your AWS credentials:
+## Deploy from CodeBuild to Lambda
+
+Fork this GitHub repository.
+
+Open CodeBuild: https://console.aws.amazon.com/codebuild.
+
+Create a project with the following:
+
+- Name: `kubesnapshot`
+- Source Provider: GitHub
+- Repository URL: `https://github.com/YOUR_NAME/kubesnapshot`
+- Runtime: Golang/1.10
+- Environment Variables:
+    - `KUBE_CLUSTER_NAME`: Name of the Kubernetes cluster (e.g. `hello.k8s.local`)
+
+Open IAM: https://console.aws.amazon.com/iam/home#/roles/codebuild-kubesnapshot-service-role.
+
+Attach the `AdministratorAccess` policy to the role.
+
+Then start the build in CodeBuild.
+
+
+## Run on Local
 
 ```sh
+# Configure your credentials
 aws configure --profile hello
 export AWS_PROFILE=hello
-```
 
-Build and run:
-
-```sh
-# Build
-make
+# Install
+go install github.com/int128/kubesnapshot
 
 # Run
 export AWS_REGION=us-west-2
 export KUBE_CLUSTER_NAME=hello.k8s.local
-./kubesnapshot --dry-run
+kubesnapshot --dry-run
 ```
 
-### Options
+Options:
 
 ```
 Usage:
@@ -45,26 +64,21 @@ Application Options:
   --retain-snapshots=    Number of snapshots to retain [$RETAIN_SNAPSHOTS]
 ```
 
-## Deploy to Lambda
-
-Install the [AWS SAM CLI](https://github.com/awslabs/aws-sam-cli):
+## Deploy from Local
 
 ```sh
+# Install AWS SAM CLI
 easy_install --user pip
 pip install --user aws-sam-cli
-```
 
-Deploy:
-
-```sh
+# Deploy
 export AWS_REGION=us-west-2
 export KUBE_CLUSTER_NAME=hello.k8s.local
 cd lambda
+make bucket
 make deploy
 ```
 
-You can change schedule in [`lambda/template.yaml`](lambda/template.yaml).
-By default the function will be executed at 00:00 UTC everyday.
 
 ## Contributions
 

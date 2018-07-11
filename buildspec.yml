@@ -1,0 +1,11 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - pip install aws-sam-cli
+  build:
+    commands:
+      - cd lambda
+      - make bucket
+      - make deploy

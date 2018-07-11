@@ -1,5 +1,5 @@
-BUCKET_NAME=kubesnapshot
 STACK_NAME=kubesnapshot
+BUCKET_NAME=kubesnapshot.$(KUBE_CLUSTER_NAME)
 
 .PHONY: bucket deploy destroy
 all: kubesnapshot
@@ -9,7 +9,7 @@ kubesnapshot: *.go ../*/*.go
 	GOOS=linux GOARCH=amd64 go build -o $@
 
 bucket:
-	aws s3 mb s3://$(BUCKET_NAME) --region $(AWS_REGION)
+	aws s3 ls s3://$(BUCKET_NAME) || aws s3 mb s3://$(BUCKET_NAME) --region $(AWS_REGION)
 
 packaged.yaml: kubesnapshot template.yaml
 	sam package --template-file template.yaml \
