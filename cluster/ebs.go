@@ -61,30 +61,31 @@ func (snapshots EBSSnapshots) FindByName(name string) EBSSnapshots {
 	return m
 }
 
-// SortByLatest returns a slice sorted by the StartTime descending.
-func (snapshots EBSSnapshots) SortByLatest() EBSSnapshotsSortedByLatest {
-	a := make(EBSSnapshotsSortedByLatest, len(snapshots))
-	for i, s := range snapshots {
-		a[i] = s
-	}
-	sort.Sort(a)
-	return a
-}
-
-// EBSSnapshotsSortedByLatest is a slice sorted by the StartTime descending.
-// This implements the sort interface.
-type EBSSnapshotsSortedByLatest EBSSnapshots
-
-func (s EBSSnapshotsSortedByLatest) Len() int      { return len(s) }
-func (s EBSSnapshotsSortedByLatest) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
-func (s EBSSnapshotsSortedByLatest) Less(i, j int) bool {
-	return s[i].StartTime.After(s[j].StartTime)
-}
-
 // TrimHead returns a slice without heading n items.
-func (s EBSSnapshotsSortedByLatest) TrimHead(n int) EBSSnapshotsSortedByLatest {
-	if n > len(s) {
-		return EBSSnapshotsSortedByLatest{}
+func (snapshots EBSSnapshots) TrimHead(n int) EBSSnapshots {
+	if n > len(snapshots) {
+		return EBSSnapshots{}
 	}
-	return s[n:]
+	return snapshots[n:]
+}
+
+// SortByLatest returns a slice sorted by the StartTime descending.
+func (snapshots EBSSnapshots) SortByLatest() {
+	sort.Sort(sort.Reverse(byStartTime{snapshots}))
+}
+
+type byStartTime struct {
+	EBSSnapshots
+}
+
+func (s byStartTime) Len() int {
+	return len(s.EBSSnapshots)
+}
+
+func (s byStartTime) Swap(i, j int) {
+	s.EBSSnapshots[i], s.EBSSnapshots[j] = s.EBSSnapshots[j], s.EBSSnapshots[i]
+}
+
+func (s byStartTime) Less(i, j int) bool {
+	return s.EBSSnapshots[i].StartTime.Before(s.EBSSnapshots[j].StartTime)
 }

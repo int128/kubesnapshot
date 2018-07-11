@@ -21,7 +21,8 @@ func (b *Backup) ComputeOperations(volumes cluster.EBSVolumes, snapshots cluster
 			ops.VolumesToCreateSnapshot = append(ops.VolumesToCreateSnapshot, volume)
 
 			snapshotsOfVolume := snapshots.FindByName(volume.Name)
-			snapshotsToDelete := snapshotsOfVolume.SortByLatest().TrimHead(b.RetainSnapshots - 1)
+			snapshotsOfVolume.SortByLatest()
+			snapshotsToDelete := snapshotsOfVolume.TrimHead(b.RetainSnapshots - 1)
 			ops.SnapshotsToDelete = append(ops.SnapshotsToDelete, snapshotsToDelete...)
 		}
 	}
