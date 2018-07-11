@@ -10,7 +10,7 @@ import (
 // Operations represents a set of operations for backup.
 type Operations struct {
 	VolumesToCreateSnapshot cluster.EBSVolumes
-	SnapshotsToDelete       cluster.EBSSnapshotsSortedByLatest
+	SnapshotsToDelete       cluster.EBSSnapshots
 }
 
 // ComputeOperations returns a operations for the backup.
@@ -20,8 +20,9 @@ func (b *Backup) ComputeOperations(volumes cluster.EBSVolumes, snapshots cluster
 		if volume.Name != "" {
 			ops.VolumesToCreateSnapshot = append(ops.VolumesToCreateSnapshot, volume)
 
-			snapshotsFromVolume := snapshots.FindByName(volume.Name).SortByLatest()
-			ops.SnapshotsToDelete = snapshotsFromVolume.TrimHead(b.RetainCount)
+			snapshotsOfVolume := snapshots.FindByName(volume.Name)
+			snapshotsToDelete := snapshotsOfVolume.SortByLatest().TrimHead(b.RetainCount - 1)
+			ops.SnapshotsToDelete = append(ops.SnapshotsToDelete, snapshotsToDelete...)
 		}
 	}
 	return &ops

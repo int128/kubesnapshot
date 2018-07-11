@@ -26,6 +26,10 @@ func main() {
 		parser.WriteHelp(os.Stderr)
 		os.Exit(1)
 	}
+	if opts.RetainCount < 1 {
+		log.Fatalf("RetainCount must be 1 or more but %d", opts.RetainCount)
+	}
+
 	sess, err := session.NewSession()
 	if err != nil {
 		log.Fatal(err)
@@ -33,9 +37,10 @@ func main() {
 	svc := cluster.New(opts.ClusterName, sess)
 	b := &backup.Backup{
 		DryRun:      opts.DryRun,
-		RetainCount: 5,
+		RetainCount: opts.RetainCount,
 	}
+	log.Printf("Backup the cluster %s with %+v", opts.ClusterName, b)
 	if err := b.Do(svc); err != nil {
-		log.Fatalf("Could not take snapshots: %s", err)
+		log.Fatalf("Error: %s", err)
 	}
 }
