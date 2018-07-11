@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/int128/kubesnapshot/aws_k8s"
 	"github.com/int128/kubesnapshot/backup"
-	"github.com/int128/kubesnapshot/cluster"
 	flags "github.com/jessevdk/go-flags"
 )
 
@@ -34,13 +34,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	svc := cluster.New(sess)
+	svc := aws_k8s.New(sess)
 	b := &backup.Backup{
 		DryRun:          opts.DryRun,
-		ClusterName:     cluster.ClusterName(opts.ClusterName),
+		ClusterName:     aws_k8s.ClusterName(opts.ClusterName),
 		RetainSnapshots: opts.RetainSnapshots,
 	}
-	log.Printf("Backup the cluster %s with %+v", opts.ClusterName, b)
+	log.Printf("Backup the cluster %+v", b)
 	if err := b.Do(svc); err != nil {
 		log.Fatalf("Error: %s", err)
 	}

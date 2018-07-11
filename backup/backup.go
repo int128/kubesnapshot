@@ -5,18 +5,18 @@ import (
 	"log"
 	"os"
 
-	"github.com/int128/kubesnapshot/cluster"
+	"github.com/int128/kubesnapshot/aws_k8s"
 )
 
 // Backup represents a backup for the cluster.
 type Backup struct {
 	DryRun          bool                // Dry-run flag
-	ClusterName     cluster.ClusterName // Kubernetes cluster name
+	ClusterName     aws_k8s.ClusterName // Kubernetes cluster name
 	RetainSnapshots int                 // Number of snapshots to retain (1 or more)
 }
 
 // Do performs the backup.
-func (b *Backup) Do(service *cluster.Service) error {
+func (b *Backup) Do(service *aws_k8s.Service) error {
 	log.Printf("Finding EBS volumes and snaphosts in the cluster %s", b.ClusterName)
 	volumes, snapshots, err := service.ListOwnedEBSVolumesAndSnapshots(b.ClusterName)
 	if err != nil {

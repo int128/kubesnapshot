@@ -1,4 +1,4 @@
-package cluster
+package aws_k8s
 
 import (
 	"fmt"

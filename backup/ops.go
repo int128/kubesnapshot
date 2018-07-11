@@ -4,17 +4,17 @@ import (
 	"io"
 	"text/template"
 
-	"github.com/int128/kubesnapshot/cluster"
+	"github.com/int128/kubesnapshot/aws_k8s"
 )
 
 // Operations represents a set of operations for backup.
 type Operations struct {
-	VolumesToCreateSnapshot cluster.EBSVolumes
-	SnapshotsToDelete       cluster.EBSSnapshots
+	VolumesToCreateSnapshot aws_k8s.EBSVolumes
+	SnapshotsToDelete       aws_k8s.EBSSnapshots
 }
 
 // ComputeOperations returns a operations for the backup.
-func (b *Backup) ComputeOperations(volumes cluster.EBSVolumes, snapshots cluster.EBSSnapshots) *Operations {
+func (b *Backup) ComputeOperations(volumes aws_k8s.EBSVolumes, snapshots aws_k8s.EBSSnapshots) *Operations {
 	ops := Operations{}
 	for _, volume := range volumes {
 		if volume.Name != "" {

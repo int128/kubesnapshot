@@ -1,5 +1,5 @@
-// Package cluster provides operations on the Kubernetes cluster.
-package cluster
+// package aws_k8s provides operations on the Kubernetes cluster.
+package aws_k8s
 
 import (
 	"fmt"
