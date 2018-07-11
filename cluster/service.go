@@ -10,8 +10,8 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-// KubernetesClusterName represents name of a Kubernetes cluster.
-type KubernetesClusterName string
+// ClusterName represents name of a Kubernetes cluster.
+type ClusterName string
 
 // Service provides operations on the Kubernetes cluster.
 type Service struct {
@@ -24,7 +24,7 @@ func New(s *session.Session) *Service {
 }
 
 // ListOwnedEBSVolumes returns EBS volumes owned by the cluster.
-func (s *Service) ListOwnedEBSVolumes(name KubernetesClusterName) (EBSVolumes, error) {
+func (s *Service) ListOwnedEBSVolumes(name ClusterName) (EBSVolumes, error) {
 	out, err := s.ec2.DescribeVolumes(&ec2.DescribeVolumesInput{
 		Filters: []*ec2.Filter{name.OwnedTagFilter()},
 	})
@@ -39,7 +39,7 @@ func (s *Service) ListOwnedEBSVolumes(name KubernetesClusterName) (EBSVolumes, e
 }
 
 // ListOwnedEBSSnapshots returns EBS snapshots owned by the cluster.
-func (s *Service) ListOwnedEBSSnapshots(name KubernetesClusterName) (EBSSnapshots, error) {
+func (s *Service) ListOwnedEBSSnapshots(name ClusterName) (EBSSnapshots, error) {
 	out, err := s.ec2.DescribeSnapshots(&ec2.DescribeSnapshotsInput{
 		Filters: []*ec2.Filter{name.OwnedTagFilter()},
 	})
@@ -54,7 +54,7 @@ func (s *Service) ListOwnedEBSSnapshots(name KubernetesClusterName) (EBSSnapshot
 }
 
 // ListOwnedEBSVolumesAndSnapshots performs concurrent requests.
-func (s *Service) ListOwnedEBSVolumesAndSnapshots(name KubernetesClusterName) (EBSVolumes, EBSSnapshots, error) {
+func (s *Service) ListOwnedEBSVolumesAndSnapshots(name ClusterName) (EBSVolumes, EBSSnapshots, error) {
 	var volumes EBSVolumes
 	var snapshots EBSSnapshots
 	var eg errgroup.Group

@@ -10,19 +10,20 @@ import (
 
 // Backup represents a backup for the cluster.
 type Backup struct {
-	DryRun          bool // Dry-run flag
-	RetainSnapshots int  // Number of snapshots to retain (1 or more)
+	DryRun          bool                // Dry-run flag
+	ClusterName     cluster.ClusterName // Kubernetes cluster name
+	RetainSnapshots int                 // Number of snapshots to retain (1 or more)
 }
 
 // Do performs the backup.
 func (b *Backup) Do(service *cluster.Service) error {
-	log.Printf("Finding EBS volumes and snaphosts in the cluster %s", service.ClusterName)
-	volumes, snapshots, err := service.ListOwnedEBSVolumesAndSnapshots()
+	log.Printf("Finding EBS volumes and snaphosts in the cluster %s", b.ClusterName)
+	volumes, snapshots, err := service.ListOwnedEBSVolumesAndSnapshots(b.ClusterName)
 	if err != nil {
 		return fmt.Errorf("Could not get EBS volumes or snaphosts: %s", err)
 	}
-	log.Printf("Found %d volumes owned by the cluster %s", len(volumes), service.ClusterName)
-	log.Printf("Found %d snapshots owned by the cluster %s", len(snapshots), service.ClusterName)
+	log.Printf("Found %d volumes owned by the cluster %s", len(volumes), b.ClusterName)
+	log.Printf("Found %d snapshots owned by the cluster %s", len(snapshots), b.ClusterName)
 
 	ops := b.ComputeOperations(volumes, snapshots)
 	ops.Print(os.Stdout)

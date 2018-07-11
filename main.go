@@ -34,9 +34,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	svc := cluster.New(opts.ClusterName, sess)
+	svc := cluster.New(sess)
 	b := &backup.Backup{
 		DryRun:          opts.DryRun,
+		ClusterName:     cluster.ClusterName(opts.ClusterName),
 		RetainSnapshots: opts.RetainSnapshots,
 	}
 	log.Printf("Backup the cluster %s with %+v", opts.ClusterName, b)

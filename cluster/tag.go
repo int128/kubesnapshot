@@ -8,7 +8,7 @@ import (
 )
 
 // OwnedTagFilter returns a filter for the cluster owned tag.
-func (k KubernetesClusterName) OwnedTagFilter() *ec2.Filter {
+func (k ClusterName) OwnedTagFilter() *ec2.Filter {
 	return &ec2.Filter{
 		Name:   aws.String(fmt.Sprintf("tag:kubernetes.io/cluster/%s", k)),
 		Values: aws.StringSlice([]string{"owned"}),

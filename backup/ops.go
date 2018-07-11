@@ -15,7 +15,7 @@ type Operations struct {
 
 // ComputeOperations returns a operations for the backup.
 func (b *Backup) ComputeOperations(volumes cluster.EBSVolumes, snapshots cluster.EBSSnapshots) *Operations {
-	var ops Operations
+	ops := Operations{}
 	for _, volume := range volumes {
 		if volume.Name != "" {
 			ops.VolumesToCreateSnapshot = append(ops.VolumesToCreateSnapshot, volume)
