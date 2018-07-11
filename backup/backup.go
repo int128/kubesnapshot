@@ -10,8 +10,8 @@ import (
 
 // Backup represents a backup for the cluster.
 type Backup struct {
-	DryRun      bool // Dry-run flag
-	RetainCount int  // Number of snapshots to retain (1 or more)
+	DryRun          bool // Dry-run flag
+	RetainSnapshots int  // Number of snapshots to retain (1 or more)
 }
 
 // Do performs the backup.

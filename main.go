@@ -11,9 +11,9 @@ import (
 )
 
 var opts struct {
-	DryRun      bool   `long:"dry-run" env:"DRY_RUN" description:"Dry-run flag"`
-	ClusterName string `long:"kube-cluster-name" env:"KUBE_CLUSTER_NAME" required:"1" description:"Kubernetes cluster name"`
-	RetainCount int    `long:"retain-count" env:"RETAIN_COUNT" default:"5" description:"Number of snapshots to retain"`
+	DryRun          bool   `long:"dry-run" env:"DRY_RUN" description:"Dry-run flag"`
+	ClusterName     string `long:"kube-cluster-name" env:"KUBE_CLUSTER_NAME" required:"1" description:"Kubernetes cluster name"`
+	RetainSnapshots int    `long:"retain-snapshots" env:"RETAIN_SNAPSHOTS" default:"5" description:"Number of snapshots to retain"`
 }
 
 func main() {
@@ -26,8 +26,8 @@ func main() {
 		parser.WriteHelp(os.Stderr)
 		os.Exit(1)
 	}
-	if opts.RetainCount < 1 {
-		log.Fatalf("RetainCount must be 1 or more but %d", opts.RetainCount)
+	if opts.RetainSnapshots < 1 {
+		log.Fatalf("RetainSnapshots must be 1 or more but %d", opts.RetainSnapshots)
 	}
 
 	sess, err := session.NewSession()
@@ -36,8 +36,8 @@ func main() {
 	}
 	svc := cluster.New(opts.ClusterName, sess)
 	b := &backup.Backup{
-		DryRun:      opts.DryRun,
-		RetainCount: opts.RetainCount,
+		DryRun:          opts.DryRun,
+		RetainSnapshots: opts.RetainSnapshots,
 	}
 	log.Printf("Backup the cluster %s with %+v", opts.ClusterName, b)
 	if err := b.Do(svc); err != nil {
