@@ -1,0 +1,53 @@
+package backup
+
+import (
+	"io"
+	"text/template"
+
+	"github.com/int128/kubesnapshot/cluster"
+)
+
+// Operations represents a set of operations for backup.
+type Operations struct {
+	VolumesToCreateSnapshot cluster.EBSVolumes
+	SnapshotsToDelete       cluster.EBSSnapshotsSortedByLatest
+}
+
+// ComputeOperations returns a operations for the backup.
+func (b *Backup) ComputeOperations(volumes cluster.EBSVolumes, snapshots cluster.EBSSnapshots) *Operations {
+	var ops Operations
+	for _, volume := range volumes {
+		if volume.Name != "" {
+			ops.VolumesToCreateSnapshot = append(ops.VolumesToCreateSnapshot, volume)
+
+			snapshotsFromVolume := snapshots.FindByName(volume.Name).SortByLatest()
+			ops.SnapshotsToDelete = snapshotsFromVolume.TrimHead(b.RetainCount)
+		}
+	}
+	return &ops
+}
+
+// Print shows details of operations.
+func (o *Operations) Print(w io.Writer) {
+	opsTemplate.Execute(w, o)
+}
+
+var opsTemplate = template.Must(template.New("ops").Parse(`
+Each snapshot of the following {{len .VolumesToCreateSnapshot}} volumes will be created:
+{{- range $_, $e := .VolumesToCreateSnapshot}}
+  {{$e.ID}}
+  {{- " "}}{{$e.Name}}
+  {{- " "}}{{$e.PersistentVolumeTags.PersistentVolumeClaimNamespace}}
+  {{- " "}}{{$e.PersistentVolumeTags.PersistentVolumeClaimName}}
+{{- end}}
+
+The following {{len .SnapshotsToDelete}} snapshots will be deleted:
+{{- range $_, $e := .SnapshotsToDelete}}
+  {{$e.ID}}
+  {{- " "}}[{{$e.StartTime}}]
+  {{- " "}}{{$e.Name}}
+  {{- " "}}{{$e.PersistentVolumeTags.PersistentVolumeClaimNamespace}}
+  {{- " "}}{{$e.PersistentVolumeTags.PersistentVolumeClaimName}}
+{{- end}}
+
+`))

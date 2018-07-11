@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -37,6 +36,6 @@ func main() {
 		RetainCount: 5,
 	}
 	if err := b.Do(svc); err != nil {
-		fmt.Printf("Could not take snapshots: %s", err)
+		log.Fatalf("Could not take snapshots: %s", err)
 	}
 }
