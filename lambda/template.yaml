@@ -2,6 +2,13 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: kubesnapshot Lambda function
 
+Parameters:
+  KubeClusterName:
+    Type: String
+  Schedule:
+    Type: String
+    Default: cron(0 0 * * ? *)
+
 Resources:
   KubeSnapshotFunction:
     Type: AWS::Serverless::Function
@@ -12,12 +19,10 @@ Resources:
         Daily:
           Type: Schedule
           Properties:
-            Schedule: cron(0 0 * * ? *)
-      # Environment:
-      #   Variables:
-      #     DRY_RUN: false
-      #     KUBE_CLUSTER_NAME: hello.k8s.local
-      #     RETAIN_SNAPSHOTS: 5
+            Schedule: !Ref Schedule
+      Environment:
+        Variables:
+          KUBE_CLUSTER_NAME: !Ref KubeClusterName
       Policies:
         - Version: "2012-10-17"
           Statement:

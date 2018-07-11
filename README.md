@@ -58,6 +58,7 @@ Deploy:
 
 ```sh
 export AWS_REGION=us-west-2
+export KUBE_CLUSTER_NAME=hello.k8s.local
 cd lambda
 make deploy
 ```
