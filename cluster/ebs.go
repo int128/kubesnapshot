@@ -50,7 +50,7 @@ func awsEBSSnapshot(s *ec2.Snapshot) *EBSSnapshot {
 // EBSSnapshots represents EBS snapshots.
 type EBSSnapshots []*EBSSnapshot
 
-// FindByName returns EBS snapshots of the name.
+// FindByName returns EBS snapshots that have the name.
 func (snapshots EBSSnapshots) FindByName(name string) EBSSnapshots {
 	m := make(EBSSnapshots, 0)
 	for _, s := range snapshots {
