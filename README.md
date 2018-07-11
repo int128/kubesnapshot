@@ -62,6 +62,9 @@ cd lambda
 make deploy
 ```
 
+You can change schedule in [`lambda/template.yaml`](lambda/template.yaml).
+By default the function will be executed at 00:00 UTC everyday.
+
 ## Contributions
 
 This is an open source software.

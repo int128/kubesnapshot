@@ -8,40 +8,30 @@ Resources:
     Properties:
       Handler: kubesnapshot
       Runtime: go1.x
-      Role: !GetAtt KubeSnapshotIAMRole.Arn
-      Timeout: 60
+      Events:
+        Daily:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 0 * * ? *)
       # Environment:
       #   Variables:
       #     DRY_RUN: false
       #     KUBE_CLUSTER_NAME: hello.k8s.local
       #     RETAIN_SNAPSHOTS: 5
-
-  KubeSnapshotIAMRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
       Policies:
-        - PolicyName: KubeSnapshotIAMPolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action: cloudwatch:*
-                Resource: "*"
-              - Effect: Allow
-                Action:
-                  - ec2:DescribeVolumes
-                  - ec2:DescribeSnapshots
-                Resource: "*"
-              - Effect: Allow
-                Action:
-                  - ec2:CreateSnapshot
-                Resource:
-                  - arn:aws:ec2:*::snapshot/*
-                  - arn:aws:ec2:*:*:volume/*
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - ec2:DescribeVolumes
+                - ec2:DescribeSnapshots
+              Resource: "*"
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - ec2:CreateSnapshot
+              Resource:
+                - arn:aws:ec2:*::snapshot/*
+                - arn:aws:ec2:*:*:volume/*
+      Timeout: 60
