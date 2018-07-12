@@ -4,23 +4,58 @@ A command to create snapshots for EBS volumes owned by the Kubernetes cluster on
 Written in Go.
 
 
-## Run on Local
+## How it works
+
+kubesnapshot finds EBS volumes owned by the Kubernetes cluster.
+The volumes should be tagged with key `kubernetes.io/cluster/KUBE_CLUSTER_NAME` and value `owned`.
+
+Then, kubesnapshot creates an snapshot of each EBS volume owned by the cluster.
+It also copies the tags of the EBS volume to the snapshot.
+
+Finally, kubesnapshot retains the specified number of snapshots (5 by default) and deletes the oldest.
+
+### Example
+
+If the following EBS volumes and snapshots exist,
+
+ID       | Tags                                 | Taken
+---------|--------------------------------------|------
+`vol-1`  | `Name=hello.k8s.local-dynamic-pvc-1` | -
+`snap-1` | `Name=hello.k8s.local-dynamic-pvc-1` | 2018-06-30
+`snap-2` | `Name=hello.k8s.local-dynamic-pvc-1` | 2018-07-01
+`snap-3` | `Name=hello.k8s.local-dynamic-pvc-1` | 2018-07-02
+
+and kubesnapshot is run with the option `--retain-snapshots=2`,
+the following snapshots will exist after run.
+
+ID       | Tags                                 | Taken
+---------|--------------------------------------|------
+`vol-1`  | `Name=hello.k8s.local-dynamic-pvc-1` | -
+`snap-3` | `Name=hello.k8s.local-dynamic-pvc-1` | 2018-07-02
+`snap-4` | `Name=hello.k8s.local-dynamic-pvc-1` | 2018-07-03
+
+
+## Lambda
+
+kubesnapshot can be run as a Lambda function.
+See [lambda/README.md](lambda/README.md).
+
+
+## Run locally
+
+Install:
 
 ```sh
-# Configure your credentials
-aws configure --profile hello
-export AWS_PROFILE=hello
-
-# Install
 go install github.com/int128/kubesnapshot
-
-# Run
-export AWS_REGION=us-west-2
-export KUBE_CLUSTER_NAME=hello.k8s.local
-kubesnapshot --dry-run
 ```
 
-Options:
+Run:
+
+```sh
+kubesnapshot --dry-run --kube-cluster-name=hello.k8s.local
+```
+
+It accepts the following options:
 
 ```
 Usage:
@@ -42,41 +77,30 @@ Application Options:
   --retain-snapshots=    Number of snapshots to retain [$RETAIN_SNAPSHOTS]
 ```
 
+Here is an example:
 
-## Deploy to Lambda from Local
-
-```sh
-# Install AWS SAM CLI
-easy_install --user pip
-pip install --user aws-sam-cli
-
-# Deploy
-export AWS_REGION=us-west-2
-export KUBE_CLUSTER_NAME=hello.k8s.local
-cd lambda
-make bucket
-make deploy
 ```
+% export KUBE_CLUSTER_NAME=hello.k8s.local
+% kubesnapshot --dry-run --retain-snapshots=1
+2018/07/13 00:51:10 Backup the cluster &{DryRun:true ClusterName:hello.k8s.local RetainSnapshots:1}
+2018/07/13 00:51:10 Finding EBS volumes and snaphosts in the cluster hello.k8s.local
+2018/07/13 00:51:11 Found 4 volumes owned by the cluster hello.k8s.local
+2018/07/13 00:51:11 Found 4 snapshots owned by the cluster hello.k8s.local
 
+Each snapshot of the following 4 volumes will be created:
+  vol-0a13b6e452da55927 hello.k8s.local-dynamic-pvc-f6a475fc-15e0-11e8-9a6e-06365716f47a devops jira-atlassian-jira-software
+  vol-0e1b13ac39e6dcb10 hello.k8s.local-dynamic-pvc-9ff16cda-35a4-11e8-b48a-06091fbf9444 devops gitbucket
+  vol-0d14174c6c11f5e3d a.etcd-events.hello.k8s.local
+  vol-0ee8b3f5a6c2286c2 a.etcd-main.hello.k8s.local
 
-## Deploy to Lambda from CodeBuild
+The following 4 snapshots will be deleted:
+  snap-03ea3c7ad888e9541 [2018-07-11 02:03:58 +0000 UTC] hello.k8s.local-dynamic-pvc-f6a475fc-15e0-11e8-9a6e-06365716f47a devops jira-atlassian-jira-software
+  snap-0bec5e9ce8c939ea8 [2018-07-11 02:03:58 +0000 UTC] hello.k8s.local-dynamic-pvc-9ff16cda-35a4-11e8-b48a-06091fbf9444 devops gitbucket
+  snap-0afb58168eb0a88c9 [2018-07-11 02:03:59 +0000 UTC] a.etcd-events.hello.k8s.local
+  snap-0faba5c1eb7858b2f [2018-07-11 02:03:59 +0000 UTC] a.etcd-main.hello.k8s.local
 
-Open CodeBuild: https://console.aws.amazon.com/codebuild.
-
-Create a project with the following:
-
-- Name: `kubesnapshot`
-- Source Provider: GitHub
-- Repository URL: `https://github.com/int128/kubesnapshot`
-- Runtime: Golang/1.10
-- Environment Variables:
-    - `KUBE_CLUSTER_NAME`: Name of the Kubernetes cluster (e.g. `hello.k8s.local`)
-
-Open IAM: https://console.aws.amazon.com/iam/home#/roles/codebuild-kubesnapshot-service-role.
-
-Attach the `AdministratorAccess` policy to the role.
-
-Then start the build in CodeBuild.
+2018/07/13 00:51:11 Stop due to dry run.
+```
 
 
 ## Contributions
