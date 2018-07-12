@@ -4,28 +4,6 @@ A command to create snapshots for EBS volumes owned by the Kubernetes cluster on
 Written in Go.
 
 
-## Deploy from CodeBuild to Lambda
-
-Fork this GitHub repository.
-
-Open CodeBuild: https://console.aws.amazon.com/codebuild.
-
-Create a project with the following:
-
-- Name: `kubesnapshot`
-- Source Provider: GitHub
-- Repository URL: `https://github.com/YOUR_NAME/kubesnapshot`
-- Runtime: Golang/1.10
-- Environment Variables:
-    - `KUBE_CLUSTER_NAME`: Name of the Kubernetes cluster (e.g. `hello.k8s.local`)
-
-Open IAM: https://console.aws.amazon.com/iam/home#/roles/codebuild-kubesnapshot-service-role.
-
-Attach the `AdministratorAccess` policy to the role.
-
-Then start the build in CodeBuild.
-
-
 ## Run on Local
 
 ```sh
@@ -64,7 +42,8 @@ Application Options:
   --retain-snapshots=    Number of snapshots to retain [$RETAIN_SNAPSHOTS]
 ```
 
-## Deploy from Local
+
+## Deploy to Lambda from Local
 
 ```sh
 # Install AWS SAM CLI
@@ -78,6 +57,26 @@ cd lambda
 make bucket
 make deploy
 ```
+
+
+## Deploy to Lambda from CodeBuild
+
+Open CodeBuild: https://console.aws.amazon.com/codebuild.
+
+Create a project with the following:
+
+- Name: `kubesnapshot`
+- Source Provider: GitHub
+- Repository URL: `https://github.com/int128/kubesnapshot`
+- Runtime: Golang/1.10
+- Environment Variables:
+    - `KUBE_CLUSTER_NAME`: Name of the Kubernetes cluster (e.g. `hello.k8s.local`)
+
+Open IAM: https://console.aws.amazon.com/iam/home#/roles/codebuild-kubesnapshot-service-role.
+
+Attach the `AdministratorAccess` policy to the role.
+
+Then start the build in CodeBuild.
 
 
 ## Contributions

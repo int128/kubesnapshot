@@ -5,6 +5,9 @@ Description: kubesnapshot Lambda function
 Parameters:
   KubeClusterName:
     Type: String
+  RetainSnapshots:
+    Type: String
+    Default: ""
   Schedule:
     Type: String
     Default: cron(0 0 * * ? *)
@@ -23,6 +26,7 @@ Resources:
       Environment:
         Variables:
           KUBE_CLUSTER_NAME: !Ref KubeClusterName
+          RETAIN_SNAPSHOTS: !Ref RetainSnapshots
       Policies:
         - Version: "2012-10-17"
           Statement:

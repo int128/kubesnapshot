@@ -1,5 +1,9 @@
 version: 0.2
 
+#env:
+#  variables:
+#    KUBE_CLUSTER_NAME: hello.k8s.local
+
 phases:
   install:
     commands:
@@ -7,5 +11,6 @@ phases:
   build:
     commands:
       - cd lambda
+      - make
       - make bucket
       - make deploy
