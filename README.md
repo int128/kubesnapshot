@@ -48,21 +48,18 @@ ID       | Tags                                 | Taken
 `snap-4` | `Name=hello.k8s.local-dynamic-pvc-1` | 2018-07-03
 
 
-## Run locally
-
-Install:
+## Getting Started
 
 ```sh
+# Go
 go install github.com/int128/kubesnapshot
-```
-
-Run:
-
-```sh
 kubesnapshot --dry-run --kube-cluster-name=hello.k8s.local
+
+# Docker
+docker run --rm int128/kubesnapshot
 ```
 
-It accepts the following options:
+It accepts the following arguments and environment variables:
 
 ```
 Usage:
