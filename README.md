@@ -1,4 +1,4 @@
-# kubesnapshot
+# kubesnapshot [![CircleCI](https://circleci.com/gh/int128/kubesnapshot.svg?style=shield)](https://circleci.com/gh/int128/kubesnapshot)
 
 A command to create snapshots for EBS volumes owned by the Kubernetes cluster on AWS.
 Written in Go and deployable to Lambda.
