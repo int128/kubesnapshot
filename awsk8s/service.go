@@ -3,8 +3,11 @@ package awsk8s
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"golang.org/x/sync/errgroup"
@@ -19,8 +22,24 @@ type Service struct {
 }
 
 // New returns a new Service.
-func New(s *session.Session) *Service {
-	return &Service{ec2.New(s)}
+func New() (*Service, error) {
+	sess, err := session.NewSession(determineRegion())
+	if err != nil {
+		return nil, fmt.Errorf("Could not create a session: %s", err)
+	}
+	return &Service{ec2.New(sess)}, nil
+}
+
+func determineRegion() *aws.Config {
+	if os.Getenv("AWS_REGION") != "" {
+		return aws.NewConfig()
+	}
+	region, err := ec2metadata.New(session.New()).Region()
+	if err != nil {
+		return aws.NewConfig()
+	}
+	log.Printf("Using region %s determined from EC2 metadata", region)
+	return aws.NewConfig().WithRegion(region)
 }
 
 // ListOwnedEBSVolumes returns EBS volumes owned by the cluster.

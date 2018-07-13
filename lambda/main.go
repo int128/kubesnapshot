@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/int128/kubesnapshot/awsk8s"
 	"github.com/int128/kubesnapshot/backup"
 	"github.com/int128/kubesnapshot/options"
@@ -18,11 +17,10 @@ func handler(ctx context.Context) error {
 		options.WriteHelp(os.Stderr)
 		return err
 	}
-	sess, err := session.NewSession()
+	svc, err := awsk8s.New()
 	if err != nil {
 		return err
 	}
-	svc := awsk8s.New(sess)
 	b := &backup.Backup{
 		DryRun:          opts.DryRun,
 		ClusterName:     awsk8s.ClusterName(opts.ClusterName),

@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/int128/kubesnapshot/awsk8s"
 	"github.com/int128/kubesnapshot/backup"
 	"github.com/int128/kubesnapshot/options"
@@ -19,11 +18,10 @@ func main() {
 		options.WriteHelp(os.Stderr)
 		os.Exit(1)
 	}
-	sess, err := session.NewSession()
+	svc, err := awsk8s.New()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error: %s", err)
 	}
-	svc := awsk8s.New(sess)
 	b := &backup.Backup{
 		DryRun:          opts.DryRun,
 		ClusterName:     awsk8s.ClusterName(opts.ClusterName),
