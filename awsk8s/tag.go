@@ -1,4 +1,4 @@
-package aws_k8s
+package awsk8s
 
 import (
 	"fmt"

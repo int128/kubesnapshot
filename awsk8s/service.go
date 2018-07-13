@@ -1,5 +1,5 @@
-// package aws_k8s provides operations on the Kubernetes cluster.
-package aws_k8s
+// Package awsk8s provides operations on the Kubernetes cluster.
+package awsk8s
 
 import (
 	"fmt"
