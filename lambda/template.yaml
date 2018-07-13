@@ -7,7 +7,7 @@ Parameters:
     Type: String
   RetainSnapshots:
     Type: String
-    Default: ""
+    Default: 5
   Schedule:
     Type: String
     Default: cron(0 0 * * ? *)
