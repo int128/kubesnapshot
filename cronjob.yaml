@@ -18,10 +18,5 @@ spec:
                     configMapKeyRef:
                       name: kubesnapshot
                       key: KUBE_CLUSTER_NAME
-                - name: AWS_REGION
-                  valueFrom:
-                    configMapKeyRef:
-                      name: kubesnapshot
-                      key: AWS_REGION
           restartPolicy: Never
       backoffLimit: 3

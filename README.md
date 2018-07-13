@@ -119,9 +119,7 @@ You can deploy a daily job with the [`int128/kubesnapshot`](https://hub.docker.c
 Deploy [`cronjob.yaml`](cronjob.yaml) as follows:
 
 ```sh
-kubectl -n kube-system create configmap kubesnapshot \
-  --from-literal=KUBE_CLUSTER_NAME=hello.k8s.local \
-  --from-literal=AWS_REGION=us-west-2
+kubectl -n kube-system create configmap kubesnapshot --from-literal=KUBE_CLUSTER_NAME=hello.k8s.local
 kubectl -n kube-system apply -f cronjob.yaml
 ```
 
