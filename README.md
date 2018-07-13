@@ -1,22 +1,35 @@
 # kubesnapshot
 
 A command to create snapshots for EBS volumes owned by the Kubernetes cluster on AWS.
-Written in Go.
+Written in Go and deployable to Lambda.
+
+
+## Purpose
+
+You can backup the following resources by kubesnapshot:
+
+- Dynamic provisioned volumes
+- etcd volumes (kops)
+
+A resource owned by a Kubernetes cluster should have [specific tags](https://github.com/kubernetes/kubernetes/blob/master/pkg/cloudprovider/providers/aws/tags.go).
+When you create a dynamic provisioned volume by `PersistentVolumeClaim`, the provisioner will create an EBS volume with tags for the cluster.
+
+[kops](https://github.com/kubernetes/kops) creates 2 EBS volumes for etcd.
+
+kubesnapshot creates an snapshot of each EBS volume.
 
 
 ## How it works
 
-kubesnapshot finds EBS volumes owned by the Kubernetes cluster.
-The volumes should be tagged with key `kubernetes.io/cluster/KUBE_CLUSTER_NAME` and value `owned`.
+kubesnapshot does the following steps:
 
-Then, kubesnapshot creates an snapshot of each EBS volume owned by the cluster.
-It also copies the tags of the EBS volume to the snapshot.
+1.  It finds EBS volumes owned by the Kubernetes cluster.
+    They should have a tag of key `kubernetes.io/cluster/NAME` and value `owned`.
+2.  It creates an snapshot of each EBS volume owned by the cluster.
+    It also copies the tags of the EBS volume to the snapshot.
+3.  It keeps only specified number of snapshots (5 by default) of each EBS volume.
 
-Finally, kubesnapshot retains the specified number of snapshots (5 by default) and deletes the oldest.
-
-### Example
-
-If the following EBS volumes and snapshots exist,
+For example, there are the following EBS volumes and snapshots,
 
 ID       | Tags                                 | Taken
 ---------|--------------------------------------|------
@@ -25,20 +38,14 @@ ID       | Tags                                 | Taken
 `snap-2` | `Name=hello.k8s.local-dynamic-pvc-1` | 2018-07-01
 `snap-3` | `Name=hello.k8s.local-dynamic-pvc-1` | 2018-07-02
 
-and kubesnapshot is run with the option `--retain-snapshots=2`,
-the following snapshots will exist after run.
+and you run `kubesnapshot --retain-snapshots=2`,
+there will be the following snapshots after run.
 
 ID       | Tags                                 | Taken
 ---------|--------------------------------------|------
 `vol-1`  | `Name=hello.k8s.local-dynamic-pvc-1` | -
 `snap-3` | `Name=hello.k8s.local-dynamic-pvc-1` | 2018-07-02
 `snap-4` | `Name=hello.k8s.local-dynamic-pvc-1` | 2018-07-03
-
-
-## Lambda
-
-kubesnapshot can be run as a Lambda function.
-See [lambda/README.md](lambda/README.md).
 
 
 ## Run locally
@@ -101,6 +108,12 @@ The following 4 snapshots will be deleted:
 
 2018/07/13 00:51:11 Stop due to dry run.
 ```
+
+
+## Deploy to Lambda
+
+kubesnapshot can be run as a Lambda function.
+See [lambda/README.md](lambda/README.md).
 
 
 ## Contributions
