@@ -18,5 +18,9 @@ spec:
                     configMapKeyRef:
                       name: kubesnapshot
                       key: KUBE_CLUSTER_NAME
+                # - name: RETAIN_SNAPSHOTS
+                #   value: "5"
+                # - name: DRY_RUN
+                #   value: "false"
           restartPolicy: Never
       backoffLimit: 3
