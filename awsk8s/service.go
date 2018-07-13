@@ -30,6 +30,8 @@ func New() (*Service, error) {
 	return &Service{ec2.New(sess)}, nil
 }
 
+// determineRegion returns a config with region if the EC2 metadata is available.
+// https://github.com/aws/aws-sdk-go/issues/1103
 func determineRegion() *aws.Config {
 	if os.Getenv("AWS_REGION") != "" {
 		return aws.NewConfig()
