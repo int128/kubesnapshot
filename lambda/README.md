@@ -32,6 +32,7 @@ Create a project with the following:
 - Source Provider: GitHub
 - Repository URL: `https://github.com/int128/kubesnapshot`
 - Runtime: Golang/1.10
+- Buildspec name: `lambda/buildspec.yml`
 - Environment Variables:
     - `KUBE_CLUSTER_NAME`: Name of the Kubernetes cluster (e.g. `hello.k8s.local`)
 
