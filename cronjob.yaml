@@ -1,0 +1,27 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: kubesnapshot
+spec:
+  # everyday 00:00 UTC
+  schedule: "0 0 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: kubesnapshot
+              image: int128/kubesnapshot:latest
+              env:
+                - name: KUBE_CLUSTER_NAME
+                  valueFrom:
+                    configMapKeyRef:
+                      name: kubesnapshot
+                      key: KUBE_CLUSTER_NAME
+                - name: AWS_REGION
+                  valueFrom:
+                    configMapKeyRef:
+                      name: kubesnapshot
+                      key: AWS_REGION
+          restartPolicy: Never
+      backoffLimit: 3

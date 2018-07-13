@@ -4,7 +4,7 @@ A command to create snapshots for EBS volumes owned by the Kubernetes cluster on
 Written in Go and deployable to Lambda.
 
 
-## Purpose
+## Overview
 
 You can backup the following resources by kubesnapshot:
 
@@ -13,10 +13,13 @@ You can backup the following resources by kubesnapshot:
 
 A resource owned by a Kubernetes cluster should have [specific tags](https://github.com/kubernetes/kubernetes/blob/master/pkg/cloudprovider/providers/aws/tags.go).
 When you create a dynamic provisioned volume by `PersistentVolumeClaim`, the provisioner will create an EBS volume with tags for the cluster.
+If you are using [kops](https://github.com/kubernetes/kops), it creates 2 EBS volumes for etcd.
+As well as they have the tags.
 
-[kops](https://github.com/kubernetes/kops) creates 2 EBS volumes for etcd.
+You can deploy kubesnapshot to the following platforms:
 
-kubesnapshot creates an snapshot of each EBS volume.
+- Kubernetes Cron Job
+- AWS Lambda
 
 
 ## How it works
@@ -50,13 +53,16 @@ ID       | Tags                                 | Taken
 
 ## Getting Started
 
-```sh
-# Go
-go install github.com/int128/kubesnapshot
-kubesnapshot --dry-run --kube-cluster-name=hello.k8s.local
+### Run locally
 
-# Docker
-docker run --rm int128/kubesnapshot
+You can try kubesnapshot in local as follows:
+
+```sh
+go install github.com/int128/kubesnapshot
+
+export AWS_PROFILE=example
+export AWS_REGION=us-west-2
+kubesnapshot --dry-run --kube-cluster-name=hello.k8s.local
 ```
 
 It accepts the following arguments and environment variables:
@@ -81,7 +87,7 @@ Application Options:
   --retain-snapshots=    Number of snapshots to retain [$RETAIN_SNAPSHOTS]
 ```
 
-Here is an example:
+Here is an example output:
 
 ```
 % export KUBE_CLUSTER_NAME=hello.k8s.local
@@ -106,10 +112,48 @@ The following 4 snapshots will be deleted:
 2018/07/13 00:51:11 Stop due to dry run.
 ```
 
+### Kubernetes Cron Job
 
-## Deploy to Lambda
+You can deploy a daily job with the [`int128/kubesnapshot`](https://hub.docker.com/r/int128/kubesnapshot/) image to your Kubernetes cluster.
 
-kubesnapshot can be run as a Lambda function.
+Deploy [`cronjob.yaml`](cronjob.yaml) as follows:
+
+```sh
+kubectl -n kube-system create configmap kubesnapshot \
+  --from-literal=KUBE_CLUSTER_NAME=hello.k8s.local \
+  --from-literal=AWS_REGION=us-west-2
+kubectl -n kube-system apply -f cronjob.yaml
+```
+
+You need to attach the following IAM policy to the instance role or [kube2iam](https://github.com/jtblin/kube2iam).
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeVolumes",
+                "ec2:DescribeSnapshots"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "ec2:*",
+            "Resource": [
+                "arn:aws:ec2:*::snapshot/*",
+                "arn:aws:ec2:*:*:volume/*"
+            ]
+        }
+    ]
+}
+```
+
+### AWS Lambda
+
+You can deploy kubesnapshot as a Lambda function.
 See [lambda/README.md](lambda/README.md).
 
 
