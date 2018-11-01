@@ -1,9 +1,8 @@
-FROM golang:1.10-alpine AS builder
-RUN apk update && apk add --no-cache git
-WORKDIR /go/src/github.com/int128/kubesnapshot
+FROM golang:1.11.1-alpine AS builder
+RUN apk update && apk add --no-cache git gcc musl-dev
+WORKDIR /build
 COPY . .
-RUN go get -v -t -d ./...
-RUN go install
+RUN go install -v
 
 FROM alpine:latest
 RUN apk update && apk add --no-cache ca-certificates
